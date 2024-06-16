@@ -25,6 +25,8 @@ const loading = ref(true);
 
 const asdata = inject(ASDataKey)?.value;
 
+const selectList = ref([] as Array<any>)
+
 interface Edge {
     source: string;
     target: string;
@@ -239,6 +241,19 @@ getBGP().then(async (resp) => {
     option.series[0].force.edgeLength[1] = nodes.length * 3.5;
     option.title.subtext = `Nodes: ${nodes.length} Peers: ${edges.length}`;
     loading.value = false;
+
+    selectList.value = nodes.map(n=>{return {
+      label:n.name,
+      value:n.value,
+      selectcb:()=>{
+        console.log(n.name)
+        echarts.value?.dispatchAction({
+          type: 'highlight',
+          seriesIndex:0,
+          name: n.name
+        })
+      }
+    }})
 });
 
 let timer: NodeJS.Timeout | null = null
@@ -257,6 +272,8 @@ const handle_mouse_up = (_: ECElementEvent) => {
     }, 6000);
 }
 
+const test = [{label:"111",value:"111"}]
+
 </script>
 
 <template>
@@ -265,9 +282,17 @@ const handle_mouse_up = (_: ECElementEvent) => {
     </div>
     <v-chart ref="chart" :option="option" class="graph" autoresize @mousedown="handle_mouse_down"
         @mouseup="handle_mouse_up" />
+    <searchbar class="search-bar" :data="test"></searchbar>
 </template>
 
 <style scoped>
+.search-bar {
+    position: absolute;
+    top: 2vh;
+    right: 2vw;
+    width: 20vw;
+}
+
 .graph {
     height: 100dvh;
     width: 100vw;
