@@ -17,7 +17,6 @@ declare module 'vue' {
     IEpArrowRightBold: typeof import('~icons/ep/arrow-right-bold')['default']
     IEpSearch: typeof import('~icons/ep/search')['default']
     OSPF: typeof import('./src/components/OSPF.vue')['default']
-    Search: typeof import('./src/components/search.vue')['default']
     Searchbar: typeof import('./src/components/searchbar.vue')['default']
   }
 }

@@ -8,6 +8,7 @@ import {ASDataKey} from "../inject/key";
 import {ASData} from "../api/meta";
 
 import {ECElementEvent, ECharts} from "echarts";
+import { networkInterfaces } from "os";
 
 const echarts = ref<ECharts|null>();
 
@@ -281,7 +282,6 @@ watchEffect(async () => {
       label:n.name,
       value:n.value,
       selectcb:()=>{
-        console.log(n.name)
         echarts.value?.dispatchAction({
           type: 'highlight',
           seriesIndex:0,

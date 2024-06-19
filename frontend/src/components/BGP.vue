@@ -19,13 +19,15 @@ import { ASData } from "../api/meta";
 
 import { ASDataKey } from "../inject/key"
 
-const chart = ref<ECharts | null>(null)
+import { selectItem } from "./searchbar.vue"
+
+const echarts = ref<ECharts | null>();
 
 const loading = ref(true);
 
 const asdata = inject(ASDataKey)?.value;
 
-const selectList = ref([] as Array<any>)
+const selectList = ref([] as Array<selectItem>)
 
 interface Edge {
     source: string;
@@ -230,7 +232,7 @@ getBGP().then(async (resp) => {
         edges.push({
             source: cur.src.toString(),
             target: cur.dst.toString(),
-            value: 100 / Math.min(src.peer_num, dst.peer_num)+10,
+            value: 100 / Math.min(src.peer_num, dst.peer_num) + 10,
         });
         return edges;
     }, [] as Edge[]);
@@ -242,18 +244,23 @@ getBGP().then(async (resp) => {
     option.title.subtext = `Nodes: ${nodes.length} Peers: ${edges.length}`;
     loading.value = false;
 
-    selectList.value = nodes.map(n=>{return {
-      label:n.name,
-      value:n.value,
-      selectcb:()=>{
-        console.log(n.name)
-        echarts.value?.dispatchAction({
-          type: 'highlight',
-          seriesIndex:0,
-          name: n.name
-        })
-      }
-    }})
+    selectList.value = nodes.map(n => {
+        return {
+            label: n.meta.display || n.name,
+            asn: n.value,
+            name: n.name,
+            display: n.meta.display,
+            network: n.network,
+            value: n.name,
+            selectcb: () => {
+                echarts.value?.dispatchAction({
+                    type: 'highlight',
+                    seriesIndex: 0,
+                    name: n.name
+                })
+            }
+        }
+    })
 });
 
 let timer: NodeJS.Timeout | null = null
@@ -272,17 +279,15 @@ const handle_mouse_up = (_: ECElementEvent) => {
     }, 6000);
 }
 
-const test = [{label:"111",value:"111"}]
-
 </script>
 
 <template>
     <div v-if="loading" class="graph loading">
         Loading...
     </div>
-    <v-chart ref="chart" :option="option" class="graph" autoresize @mousedown="handle_mouse_down"
+    <v-chart ref="echarts" :option="option" class="graph" autoresize @mousedown="handle_mouse_down"
         @mouseup="handle_mouse_up" />
-    <searchbar class="search-bar" :data="test"></searchbar>
+    <searchbar class="search-bar" :data="selectList"></searchbar>
 </template>
 
 <style scoped>
@@ -290,7 +295,7 @@ const test = [{label:"111",value:"111"}]
     position: absolute;
     top: 2vh;
     right: 2vw;
-    width: 20vw;
+    width: 12rem;
 }
 
 .graph {
